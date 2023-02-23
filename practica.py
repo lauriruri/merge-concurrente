@@ -31,9 +31,47 @@ idea es que la lista de C sea una lista ordenada y con todos los numeros positiv
 SEGUNDA VERSIÓN:
 cada productor tiene una lista! en vez de un valor. 
 Se controla con semáforos. Si en un proceso encuentra el -1 se acaba.
+
+-----------------------------------------------------------
+los elementos son tipo value, objeto compartido por Proceso y Consumidor
+
+¿como paso los values al consumidor? con una lista
+¿como genero los procesos? con una lista
+
+values =[Value('i',-2)
+    for _ in range(NPROD)]
+
+P[i]
+Process(_,argr(val=values[i]))
+
+cada proceso tendrá que tener un semáforo
+
+un semaforo por cada proceso para indicar que el consumidor a consumido
+un semaforo para decir que el consumidor ha consumido
 '''
 
 from multiprocessing import Process
 from multiprocessing import current_process
 from multiprocessing import Value, Array
+from multiprocessing import Semaphore
 from random import random
+
+##randint(1,30) me genera un numero entre 1 y 30 -> 14
+##randint(14,30*2) etc.
+
+def llamar_proceso(i,cota):
+
+
+
+def main():
+    N=5 #numero de procesos
+    sem = BoundedSemaphore(0) #numero es numero de procesos que pueden entrar
+    values=[]
+    procesos=[]
+    semaforos=[]
+    cota = 100
+    for i in range(0,N):
+        values[i]=Value('i',-2) #inicializo los valores a -2
+        procesos.append(Process(target=llamar_proceso, args = (i,cota)))
+
+
