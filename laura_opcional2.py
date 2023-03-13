@@ -1,7 +1,5 @@
 '''
-SEGUNDA VERSIÓN:
-cada productor tiene una lista! en vez de un valor. 
-Se controla con semáforos. Si en un proceso encuentra el -1 se acaba.
+- OPCIONAL: intento hacer dos consumidores: uno que tome el maximo y otro el minimo y se vayan turnando.
 '''
 
 from multiprocessing import Process, Manager
@@ -17,6 +15,8 @@ values = []
 procesos=[]
 lleno=[]
 vacio=[]
+paso_turno_1 = Semaphore(1)
+paso_turno_2 = Semaphore(0)
 
 def llamar_proceso(proc_id, values):
     value = 0
@@ -66,9 +66,32 @@ def minimum_pos(l): #l = [(1,2,3)] donde 1-> valor; 2-> proceso; 3-> posicion de
             pos_array = l[i][2]
     return (aux, pos_values, proceso, pos_array, contador)
 
+def maximun_pos(l): #l = [(1,2,3)] donde 1-> valor; 2-> proceso; 3-> posicion dentro del array
+    #puedo acceder a las posiciones haciendo: l[0][1] = 2
+    aux = l[0][0]
+    proceso = l[0][1]
+    pos_values = 0
+    contador = 0
+    pos_array = l[0][2]
+    longitud = len(l)
+    for i in range(0,len(l)):
+        if (aux == -1 and contador < longitud-1):
+            aux = l[i+1][0]
+            pos_values = i+1
+            proceso = l[i+1][1]
+            pos_array = l[i+1][2]
+        if (l[i][0] == -1):
+            contador = contador + 1
+        if (l[i][0] > aux and l[i][0]!=-1):
+            aux = l[i][0]
+            pos_values = i
+            proceso = l[i][1]
+            pos_array = l[i][2]
+    return (aux, pos_values, proceso, pos_array, contador)
+
 ################################
-def llamar_consumidor(lleno,values,resultado):
-    print("estoy en el cosumidor y estos son mis values : ", values)
+def llamar_consumidor1(lleno,values,resultado):
+    print("estoy en el cosumidor 1 y estos son mis values : ", values)
 
     local_values=[]
     for i in range(0,N):       
@@ -79,6 +102,7 @@ def llamar_consumidor(lleno,values,resultado):
     print("initial values are:", local_values)
     
     while True:
+        paso_turno_1.acquire()
         (minimo, pos_values, proceso, pos_array, contador) = minimum_pos(local_values)
         if (contador == len(local_values)):
             break
@@ -90,13 +114,41 @@ def llamar_consumidor(lleno,values,resultado):
         lleno[proceso].acquire()
         local_values[pos_values] = (values[proceso][pos_array], proceso, pos_array)
         print("values are:", local_values)
+        paso_turno_2.release()
+
+def llamar_consumidor2(lleno,values,resultado):
+    print("estoy en el cosumidor 2 y estos son mis values : ", values)
+
+    local_values=[]
+    for i in range(0,N):       
+        print("consumer waiting for", i)
+        lleno[i].acquire()
+        for j in range(0,CAP_PROCESO):
+            local_values.append((values[i][j],i,j)) #almaceno su proceso y su indice dentro del array
+    print("initial values are:", local_values)
+    
+    while True:
+        paso_turno_2.acquire()
+        (minimo, pos_values, proceso, pos_array, contador) = minimum_pos(local_values)
+        if (contador == len(local_values)):
+            break
+        resultado.append(minimo)
+        values[proceso][pos_array] = -2
+        print("consumer releasing", proceso)
+        vacio[proceso].release()
+        print("consumer waiting", proceso)
+        lleno[proceso].acquire()
+        local_values[pos_values] = (values[proceso][pos_array], proceso, pos_array)
+        print("values are:", local_values)
+        paso_turno_1.release()
 
 ########################################
 
 def main():
 
     manager = Manager()
-    resultado = manager.list()
+    resultado1 = manager.list()
+    resultado2 = manager.list()
 
     #inicializo los procesos
     for i in range(0,N):
@@ -110,14 +162,20 @@ def main():
         proceso.start()
 
 #llamada al consumidor
-    consumidor = Process(target=llamar_consumidor, args=(lleno,values,resultado,))
-    consumidor.start()
-    consumidor.join()
+    consumidor1 = Process(target=llamar_consumidor1, args=(lleno,values,resultado1,))
+    consumidor1.start()
+    consumidor1.join()
+
+    consumidor2 = Process(target=llamar_consumidor2, args=(lleno,values,resultado2,))
+    consumidor2.start()
+    consumidor2.join()
+
     for proceso in procesos:
         proceso.join()
 
     print("\n")
-    print(resultado, "en el main")
+    print(resultado1, "en el main")
+    print(resultado2, "en el main")
     print('Ha terminado')
 
 if __name__ == "__main__" :
