@@ -17,7 +17,8 @@ COTA = 100
 N=5 #numero de procesos
 CAP_PROCESO = 3
 #sem = Semaphore(0) #numero es numero de procesos que pueden entrar
-values = Manager().list(range(0, N)) #será una lista de arrays
+#values = Manager().list(range(0, N)) #será una lista de arrays
+values = [] #Manager().list()
 #values = Array('i',range(N))
 procesos=[]
 lleno=[]
@@ -97,6 +98,7 @@ def llamar_consumidor(lleno,values,resultado):
             break
         resultado.append(minimo)
         #j=j+1
+        values[proceso][pos_array] = -2
         print("consumer releasing", proceso)
         vacio[proceso].release()
         print("consumer waiting", proceso)
@@ -119,7 +121,7 @@ def main():
         #values.append(Array('i',range(CAP_PROCESO))) #inicializo los valores a -2
         #value.append([])
         #values.append(Manager().list(range(CAP_PROCESO)))
-        values.append(Manager().list([-2 for x in range(0,CAP_PROCESO)]))
+        values.append(Manager().list([-2 for x in range(0, CAP_PROCESO)]))
         #for j in range(0,CAP_PROCESO):
         #    values[i].append(-2)
 
