@@ -15,8 +15,7 @@ values = []
 procesos=[]
 lleno=[]
 vacio=[]
-paso_turno_1 = Semaphore(1)
-paso_turno_2 = Semaphore(0)
+
 
 def llamar_proceso(proc_id, values):
     value = 0
@@ -89,24 +88,19 @@ def maximun_pos(l): #l = [(1,2,3)] donde 1-> valor; 2-> proceso; 3-> posicion de
             pos_array = l[i][2]
     return (aux, pos_values, proceso, pos_array, contador)
 
-################################
-def llamar_consumidor1(lleno,values,resultado):
-    print("estoy en el cosumidor 1 y estos son mis values : ", values)
 
-    local_values=[]
-    for i in range(0,N):       
-        print("consumer waiting for", i)
-        lleno[i].acquire()
-        for j in range(0,CAP_PROCESO):
-            local_values.append((values[i][j],i,j)) #almaceno su proceso y su indice dentro del array
-    print("initial values are:", local_values)
+################################
+def llamar_consumidor1(lleno,values,resultado1, paso_turno_1, paso_turno_2, local_values):
+    #print("estoy en el cosumidor 1 y estos son mis values : ", values)
+    print("ENTRO EN COSUMIDOR 1")
     
     while True:
         paso_turno_1.acquire()
         (minimo, pos_values, proceso, pos_array, contador) = minimum_pos(local_values)
         if (contador == len(local_values)):
+            paso_turno_2.release()
             break
-        resultado.append(minimo)
+        resultado1.append(minimo)
         values[proceso][pos_array] = -2
         print("consumer releasing", proceso)
         vacio[proceso].release()
@@ -114,25 +108,20 @@ def llamar_consumidor1(lleno,values,resultado):
         lleno[proceso].acquire()
         local_values[pos_values] = (values[proceso][pos_array], proceso, pos_array)
         print("values are:", local_values)
+        print("RESULTADO 1: ", resultado1)
         paso_turno_2.release()
 
-def llamar_consumidor2(lleno,values,resultado):
-    print("estoy en el cosumidor 2 y estos son mis values : ", values)
-
-    local_values=[]
-    for i in range(0,N):       
-        print("consumer waiting for", i)
-        lleno[i].acquire()
-        for j in range(0,CAP_PROCESO):
-            local_values.append((values[i][j],i,j)) #almaceno su proceso y su indice dentro del array
-    print("initial values are:", local_values)
-    
+def llamar_consumidor2(lleno,values,resultado2, paso_turno_1, paso_turno_2, local_values):
+    #print("estoy en el cosumidor 2 y estos son mis values : ", values)
+    print("ENTRO EN COSUMIDOR 2")
+   
     while True:
         paso_turno_2.acquire()
-        (minimo, pos_values, proceso, pos_array, contador) = minimum_pos(local_values)
+        (minimo, pos_values, proceso, pos_array, contador) = maximun_pos(local_values)
         if (contador == len(local_values)):
+            paso_turno_1.release()
             break
-        resultado.append(minimo)
+        resultado2.append(minimo)
         values[proceso][pos_array] = -2
         print("consumer releasing", proceso)
         vacio[proceso].release()
@@ -140,6 +129,7 @@ def llamar_consumidor2(lleno,values,resultado):
         lleno[proceso].acquire()
         local_values[pos_values] = (values[proceso][pos_array], proceso, pos_array)
         print("values are:", local_values)
+        print("RESULTADO 2: ", resultado2)
         paso_turno_1.release()
 
 ########################################
@@ -149,6 +139,11 @@ def main():
     manager = Manager()
     resultado1 = manager.list()
     resultado2 = manager.list()
+
+    paso_turno_1 = Semaphore(1)
+    paso_turno_2 = Semaphore(0)
+
+    local_values = manager.list()
 
     #inicializo los procesos
     for i in range(0,N):
@@ -161,13 +156,23 @@ def main():
     for proceso in procesos:
         proceso.start()
 
-#llamada al consumidor
-    consumidor1 = Process(target=llamar_consumidor1, args=(lleno,values,resultado1,))
-    consumidor1.start()
-    consumidor1.join()
+    #inicio local_values
+    for i in range(0,N):       
+                print("consumer waiting for", i)
+                lleno[i].acquire()
+                for j in range(0,CAP_PROCESO):
+                    local_values.append((values[i][j],i,j)) #almaceno su proceso y su indice dentro del array
+    print("initial values are:", local_values)
 
-    consumidor2 = Process(target=llamar_consumidor2, args=(lleno,values,resultado2,))
+
+    #llamada al consumidor
+    consumidor1 = Process(target=llamar_consumidor1, args=(lleno,values,resultado1, paso_turno_1, paso_turno_2,local_values,))
+    consumidor2 = Process(target=llamar_consumidor2, args=(lleno,values,resultado2, paso_turno_1, paso_turno_2,local_values,))
+
+    consumidor1.start()
     consumidor2.start()
+
+    consumidor1.join()
     consumidor2.join()
 
     for proceso in procesos:
