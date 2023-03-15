@@ -1,5 +1,9 @@
 '''
-- OPCIONAL: intento hacer dos consumidores: uno que tome el maximo y otro el minimo y se vayan turnando.
+- OPCIONAL: hacer dos consumidores: uno que tome el maximo, otro el minimo y se vayan turnando.
+    Primero el consumidor1 toma el valor minimo, después ejecuta ese proceso y da paso al consumidor2,
+    el cual toma el valor máximo, ejecuta ese proceso y vuelve a darle paso al consumidor1. De esta forma,
+    en resultado1 y resultado2 obtenemos dos listas: la primera tomando el elemento más pequeño 
+    y la otra tomando el elemento mayor (de los disponibles en ese momento en los procesos)
 '''
 
 from multiprocessing import Process, Manager
@@ -10,7 +14,7 @@ from random import random,randint
 
 COTA = 100
 N=5 #numero de procesos
-CAP_PROCESO = 3
+CAP_PROCESO = 3 #capacidad de cada proceso, 'longitud de la lista'
 values = []
 procesos=[]
 lleno=[]
@@ -25,11 +29,11 @@ def llamar_proceso(proc_id, values):
         print("process",proc_id,"wait")
         vacio[proc_id].acquire()
         for j in range(0,CAP_PROCESO):
-            print(values[proc_id])
+            #print(values[proc_id])
             if values[proc_id][j] == -2:
                 value = value + randint(0, COTA)
                 values[proc_id][j] = value
-            print("process",proc_id,"produced value", values[proc_id], "in ", j)
+            #print("process",proc_id,"produced value", values[proc_id], "in ", j)
         lleno[proc_id].release()
         print("process",proc_id,"release")
 
@@ -91,7 +95,6 @@ def maximun_pos(l): #l = [(1,2,3)] donde 1-> valor; 2-> proceso; 3-> posicion de
 
 ################################
 def llamar_consumidor1(lleno,values,resultado1, paso_turno_1, paso_turno_2, local_values):
-    #print("estoy en el cosumidor 1 y estos son mis values : ", values)
     print("ENTRO EN COSUMIDOR 1")
     
     while True:
@@ -112,7 +115,6 @@ def llamar_consumidor1(lleno,values,resultado1, paso_turno_1, paso_turno_2, loca
         paso_turno_2.release()
 
 def llamar_consumidor2(lleno,values,resultado2, paso_turno_1, paso_turno_2, local_values):
-    #print("estoy en el cosumidor 2 y estos son mis values : ", values)
     print("ENTRO EN COSUMIDOR 2")
    
     while True:
@@ -158,7 +160,7 @@ def main():
 
     #inicio local_values
     for i in range(0,N):       
-                print("consumer waiting for", i)
+                #print("consumer waiting for", i)
                 lleno[i].acquire()
                 for j in range(0,CAP_PROCESO):
                     local_values.append((values[i][j],i,j)) #almaceno su proceso y su indice dentro del array

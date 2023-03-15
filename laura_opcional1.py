@@ -12,7 +12,7 @@ from random import random,randint
 
 COTA = 100
 N=5 #numero de procesos
-CAP_PROCESO = 3
+CAP_PROCESO = 3 #capacidad de cada proceso, 'longitud de la lista'
 values = []
 procesos=[]
 lleno=[]
