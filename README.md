@@ -60,5 +60,5 @@ Para ejecutar este programa se stiene que llamar a la función main().
   -El archivo 4 contiene la solución a otra variación del ejercicio 5 propuesta por la alumna. En este modelo se tienen dos consumidores:
   consumidor1: toma el mínimo de los valores disponibles en ese momento.
   consumidor2: toma el máximo de los valores disponibles en ese momento.
-  Se sigue la siguiente idea: produce- consume consumidor1- produce - consume consumidor 2 (recursivamente hasta que todos los valores est
+  Se sigue la siguiente idea: produce- consume consumidor1- produce - consume consumidor 2 (recursivamente hasta que todos los valores esten a -1). NOTA: los resultados obtenidos no siguen un orden completo en el caso de consumidor2 ya que se produce de manera creciente).
 
