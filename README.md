@@ -54,8 +54,7 @@ Para ejecutar este programa se tiene que llamar a la función main().
 
 Comentario sobre la función minimum_pos(l): esta toma una lista y devuelve su elemento mínimo, su posición en la lista y un contador con el número de -1 que se encuentran en la lista. Esto nos interesa porque cuando nuestro productor deja de producir escribe un -1, y nuestro consumidor dejará de consumir cuando en todas las posiciones de la lista se encuentre un -1, es decir, no haya más productores produciendo.
 
-  - El archivo 3 contiene la solución al ejercicio opcional propuesto por el profesor: en esta ocasión cada productor tiene una lista de valores en lugar de un valor. Se siguen las mismas ideas planteadas en el archivo 5. Para ejecutar este programa se tiene que llamar a la función main().
-Para ejecutar este programa se stiene que llamar a la función main().
+  -El archivo 3 contiene la solución al ejercicio opcional propuesto por el profesor: en esta ocasión cada productor tiene una lista de valores en lugar de un valor. Se siguen las mismas ideas planteadas en el archivo 5. Para ejecutar este programa se tiene que llamar a la función main().
 
   -El archivo 4 contiene la solución a otra variación del ejercicio 5 propuesta por la alumna. En este modelo se tienen dos consumidores:
   consumidor1: toma el mínimo de los valores disponibles en ese momento.
